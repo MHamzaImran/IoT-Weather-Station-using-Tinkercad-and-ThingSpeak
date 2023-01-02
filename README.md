@@ -20,7 +20,7 @@ A Tinkercad projet for measuring weather details using sensors like temperature,
 ## ThingSpeak Steup
 https://thingspeak.com/
 
-You need to signup to the above website linke and create a channel there. You have to create 3 fields there of temperarure, light and gas sensor data.
+You need to signup to the above website link and create a channel there. You have to create 3 fields of temperarure, light and gas sensor data.
 Copy the Write API from thingSpeak and replace it in the Tinkercad code.
 
 ## Link for Circuit Design on Tinkercad

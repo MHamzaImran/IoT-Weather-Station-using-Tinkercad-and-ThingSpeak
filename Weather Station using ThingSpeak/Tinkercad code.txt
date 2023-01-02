@@ -1,0 +1,153 @@
+#include <LiquidCrystal.h>
+
+String ssid     = "Simulator Wifi";  // SSID to connect to
+String password = ""; // Our virtual wifi has no password 
+String host     = "api.thingspeak.com"; // Open Weather Map API
+const int httpPort   = 80;
+String uri1     = "/update?api_key=75NMTOOK1OACD6RI&field1=";
+String uri2     = "/update?api_key=75NMTOOK1OACD6RI&field2=";
+String uri3     = "/update?api_key=75NMTOOK1OACD6RI&field3=";
+
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+
+const int gas = 0;
+int MQ2pin = A0;
+
+int val = 0;
+int tempPin = A1;
+
+int light_sensor=A2;
+
+int setupESP8266(void) {
+  // Start our ESP8266 Serial Communication
+  Serial.begin(115200);   // Serial connection over USB to computer
+  Serial.println("AT");   // Serial connection on Tx / Rx port to ESP8266
+  delay(10);        // Wait a little for the ESP to respond
+  if (!Serial.find("OK")) return 1;
+    
+  // Connect to 123D Circuits Simulator Wifi
+  Serial.println("AT+CWJAP=\"" + ssid + "\",\"" + password + "\"");
+  delay(10);        // Wait a little for the ESP to respond
+  if (!Serial.find("OK")) return 2;
+  
+  // Open TCP connection to the host:
+  Serial.println("AT+CIPSTART=\"TCP\",\"" + host + "\"," + httpPort);
+  delay(50);        // Wait a little for the ESP to respond
+  if (!Serial.find("OK")) return 3;
+  
+  return 0;
+}
+
+void tempdata(int tempData) {
+  
+  int temp = tempData;
+  
+  // Construct our HTTP call
+  String httpPacket = "GET " + uri1 + String(temp) + " HTTP/1.1\r\nHost: " + host + "\r\n\r\n";
+  int length = httpPacket.length();
+  
+  // Send our message length
+  Serial.print("AT+CIPSEND=");
+  Serial.println(length);
+  delay(10); // Wait a little for the ESP to respond if (!Serial.find(">")) return -1;
+
+  // Send our http request
+  Serial.print(httpPacket);
+  delay(10); // Wait a little for the ESP to respond
+  if (!Serial.find("SEND OK\r\n")) return;
+}
+
+void lightdata(int light_reading) {
+
+  int lightvalue = light_reading;
+  
+  // Construct our HTTP call
+  String httpPacket = "GET " + uri2 + String(lightvalue) + " HTTP/1.1\r\nHost: " + host + "\r\n\r\n";
+  int length = httpPacket.length();
+  
+  // Send our message length
+  Serial.print("AT+CIPSEND=");
+  Serial.println(length);
+  delay(10); // Wait a little for the ESP to respond if (!Serial.find(">")) return -1;
+
+  // Send our http request
+  Serial.print(httpPacket);
+  delay(10); // Wait a little for the ESP to respond
+  if (!Serial.find("SEND OK\r\n")) return;
+}
+
+void gasdata(int sensorValue) {
+  
+  int gasvalue = sensorValue;
+  
+  // Construct our HTTP call
+  String httpPacket = "GET " + uri3 + String(gasvalue) + " HTTP/1.1\r\nHost: " + host + "\r\n\r\n";
+  int length = httpPacket.length();
+  
+  // Send our message length
+  Serial.print("AT+CIPSEND=");
+  Serial.println(length);
+  delay(10); // Wait a little for the ESP to respond if (!Serial.find(">")) return -1;
+
+  // Send our http request
+  Serial.print(httpPacket);
+  delay(10); // Wait a little for the ESP to respond
+  if (!Serial.find("SEND OK\r\n")) return;
+}
+
+void showlight(int light_reading){
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Sunlight level");
+  lcd.setCursor(0, 1);
+  lcd.print(String(light_reading)+ " mW/cm2");
+  delay(1000);
+}
+
+void showtemp(int cel){
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Temperature");
+  lcd.setCursor(0, 1);
+  lcd.print(String(cel)+ "° Celcius");
+  delay(1000);
+}
+
+void showgas(int sensorValue){
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Pollution level");
+  lcd.setCursor(0, 1);
+  lcd.print(sensorValue);
+  delay(1000);
+}
+
+void setup() {
+  
+  Serial.begin(9600);
+  lcd.begin(16, 2);
+  setupESP8266();
+}
+
+void loop() {
+  float sensorValue;
+  sensorValue = analogRead(MQ2pin); // read analog input pin 0
+  
+  val = analogRead(tempPin);
+  float mv = val*(5000/1024); 
+  float cel = mv/10;
+  float farh = (cel*9)/5 + 32;
+  
+  int light_reading;
+  light_reading = analogRead(light_sensor);
+  
+  showlight(light_reading); 
+  showtemp(cel);
+  showgas(sensorValue);
+  
+  tempdata(cel);
+  lightdata(light_reading);
+  gasdata(sensorValue);
+
+}
+ 

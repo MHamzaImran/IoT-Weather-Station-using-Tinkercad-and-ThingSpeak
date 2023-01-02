@@ -1,0 +1,12 @@
+﻿Name,Quantity,Component
+"U1",1," LCD 16 x 2"
+"U2",1," Arduino Uno R3"
+"U3",1," Temperature Sensor [TMP36]"
+"R1",1," Photoresistor"
+"R2",1,"4 kΩ Resistor"
+"R3",1,"10 kΩ Resistor"
+"GAS1",1," Gas Sensor"
+"U4",1," Wifi Module (ESP8266)"
+"R4, R5",2,"1 kΩ Resistor"
+"R6",1,"220 Ω Resistor"
+"Rpot2",1,"250 kΩ Potentiometer"
